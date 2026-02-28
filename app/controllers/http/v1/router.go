@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	jwtmw "github.com/kidboy-man/8-level-desent/app/middlewares/jwt"
+	"github.com/kidboy-man/8-level-desent/app/controllers/middlewares"
 	"github.com/kidboy-man/8-level-desent/app/services"
 )
 
@@ -39,7 +39,7 @@ func (r *Router) Setup() {
 	r.engine.POST("/auth/token", r.authController.GenerateToken)
 
 	protected := r.engine.Group("/")
-	protected.Use(jwtmw.AuthMiddleware(r.authService))
+	protected.Use(middlewares.AuthMiddleware(r.authService))
 	{
 		protected.POST("/books", r.bookController.Create)
 		protected.GET("/books", r.bookController.GetAll)

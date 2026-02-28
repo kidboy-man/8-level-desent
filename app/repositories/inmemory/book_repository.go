@@ -1,10 +1,10 @@
 package inmemory
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 
+	apperrors "github.com/kidboy-man/8-level-desent/app/errors"
 	"github.com/kidboy-man/8-level-desent/app/models"
 	"github.com/kidboy-man/8-level-desent/app/repositories"
 )
@@ -72,7 +72,7 @@ func (r *BookRepository) FindByID(id string) (*models.Book, error) {
 
 	book, exists := r.store[id]
 	if !exists {
-		return nil, fmt.Errorf("book with id %s not found", id)
+		return nil, apperrors.Newf(404, "NOT_FOUND", "book with id %s not found", id)
 	}
 
 	result := *book
@@ -84,7 +84,7 @@ func (r *BookRepository) Update(id string, book *models.Book) (*models.Book, err
 	defer r.mu.Unlock()
 
 	if _, exists := r.store[id]; !exists {
-		return nil, fmt.Errorf("book with id %s not found", id)
+		return nil, apperrors.Newf(404, "NOT_FOUND", "book with id %s not found", id)
 	}
 
 	book.ID = id
@@ -100,7 +100,7 @@ func (r *BookRepository) Delete(id string) error {
 	defer r.mu.Unlock()
 
 	if _, exists := r.store[id]; !exists {
-		return fmt.Errorf("book with id %s not found", id)
+		return apperrors.Newf(404, "NOT_FOUND", "book with id %s not found", id)
 	}
 
 	delete(r.store, id)

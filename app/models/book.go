@@ -2,19 +2,19 @@ package models
 
 type Book struct {
 	ID     string `json:"id"`
-	Title  string `json:"title" binding:"required"`
-	Author string `json:"author" binding:"required"`
-	Year   int    `json:"year" binding:"required,gt=0"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Year   int    `json:"year"`
 }
 
 type CreateBookRequest struct {
-	Title  string `json:"title" binding:"required"`
-	Author string `json:"author" binding:"required"`
-	Year   int    `json:"year" binding:"required,gt=0"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Year   int    `json:"year"`
 }
 
 type UpdateBookRequest struct {
-	Title  string `json:"title" binding:"required"`
-	Author string `json:"author" binding:"required"`
-	Year   int    `json:"year" binding:"required,gt=0"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Year   int    `json:"year"`
 }

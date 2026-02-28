@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	httputil "github.com/kidboy-man/8-level-desent/app/controllers/http"
 	"github.com/kidboy-man/8-level-desent/app/models"
 	"github.com/kidboy-man/8-level-desent/app/repositories"
 	"github.com/kidboy-man/8-level-desent/app/services"
@@ -21,23 +22,17 @@ func NewBookController(bookService *services.BookService) *BookController {
 func (ctrl *BookController) Create(c *gin.Context) {
 	var req models.CreateBookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
 	book, err := ctrl.bookService.CreateBook(&req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Internal Server Error",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, book)
+	httputil.ReturnSuccess(c, http.StatusCreated, book)
 }
 
 func (ctrl *BookController) GetAll(c *gin.Context) {
@@ -59,24 +54,11 @@ func (ctrl *BookController) GetAll(c *gin.Context) {
 
 	books, total, err := ctrl.bookService.GetAllBooks(filter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Internal Server Error",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
-	response := gin.H{
-		"data":  books,
-		"total": total,
-	}
-
-	if filter.Page > 0 && filter.Limit > 0 {
-		response["page"] = filter.Page
-		response["limit"] = filter.Limit
-	}
-
-	c.JSON(http.StatusOK, response)
+	httputil.ReturnSuccessWithPagination(c, http.StatusOK, books, total, filter.Page, filter.Limit)
 }
 
 func (ctrl *BookController) GetByID(c *gin.Context) {
@@ -84,14 +66,11 @@ func (ctrl *BookController) GetByID(c *gin.Context) {
 
 	book, err := ctrl.bookService.GetBookByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error":   "Not Found",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, book)
+	httputil.ReturnSuccess(c, http.StatusOK, book)
 }
 
 func (ctrl *BookController) Update(c *gin.Context) {
@@ -99,35 +78,26 @@ func (ctrl *BookController) Update(c *gin.Context) {
 
 	var req models.UpdateBookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
 	book, err := ctrl.bookService.UpdateBook(id, &req)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error":   "Not Found",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, book)
+	httputil.ReturnSuccess(c, http.StatusOK, book)
 }
 
 func (ctrl *BookController) Delete(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := ctrl.bookService.DeleteBook(id); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error":   "Not Found",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	httputil.ReturnSuccess(c, http.StatusNoContent, nil)
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	httputil "github.com/kidboy-man/8-level-desent/app/controllers/http"
 )
 
 type PingController struct{}
@@ -13,5 +14,5 @@ func NewPingController() *PingController {
 }
 
 func (ctrl *PingController) Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "pong"})
+	httputil.ReturnSuccess(c, http.StatusOK, gin.H{"message": "pong"})
 }

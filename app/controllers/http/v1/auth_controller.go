@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	httputil "github.com/kidboy-man/8-level-desent/app/controllers/http"
 	"github.com/kidboy-man/8-level-desent/app/models"
 	"github.com/kidboy-man/8-level-desent/app/services"
 )
@@ -19,21 +20,15 @@ func NewAuthController(authService *services.AuthService) *AuthController {
 func (ctrl *AuthController) GenerateToken(c *gin.Context) {
 	var req models.TokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
 	token, err := ctrl.authService.GenerateToken(req.Username, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "Unauthorized",
-			"message": err.Error(),
-		})
+		httputil.ReturnError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, models.TokenResponse{Token: token})
+	httputil.ReturnSuccess(c, http.StatusOK, models.TokenResponse{Token: token})
 }
