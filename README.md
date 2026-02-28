@@ -12,21 +12,29 @@ REST API built for the [Desent Solutions API Quest](https://www.desent.io/coding
 ## Project Structure
 
 ```
-app/
-├── main.go                          # entry point
-├── config/                          # env-based configuration
-├── errors/                          # custom AppError type
-├── models/                          # request/response structs
-├── repositories/
-│   ├── book_repository.go           # interface
-│   └── inmemory/                    # in-memory implementation
-├── services/                        # business logic
-├── controllers/
-│   ├── http/
-│   │   ├── response.go              # response helpers
-│   │   └── v1/                      # versioned HTTP handlers + router
-│   └── middlewares/                  # JWT auth middleware
-└── tests/                           # integration tests
+├── api/
+│   └── index.go                     # Vercel serverless handler
+├── app/
+│   ├── main.go                      # entry point
+│   ├── config/                      # env-based configuration
+│   ├── errors/                      # custom AppError type
+│   ├── models/                      # request/response structs
+│   ├── repositories/
+│   │   ├── book_repository.go       # interface
+│   │   └── inmemory/                # in-memory implementation
+│   ├── services/                    # business logic
+│   ├── controllers/
+│   │   ├── http/
+│   │   │   ├── response.go          # response helpers
+│   │   │   └── v1/                  # versioned HTTP handlers + router
+│   │   └── middlewares/             # JWT auth middleware
+│   └── tests/                       # integration tests
+├── deployment/
+│   ├── local/
+│   │   └── Dockerfile               # multi-stage Docker build
+│   └── dev/
+│       └── vercel.json              # Vercel route config (symlink)
+└── vercel.json                      # Vercel config (source of truth)
 ```
 
 ## Getting Started
@@ -101,10 +109,29 @@ make docker-run
 
 ## Deployment
 
-Deploy anywhere that supports Docker or Go binaries. The app reads `PORT` from the environment, so it works out of the box on Render, Railway, Fly.io, etc.
+### Docker
 
 ```bash
-# Example: build and push Docker image
-docker build -t my-api .
+make docker-run
+```
+
+Or manually:
+
+```bash
+docker build -f deployment/local/Dockerfile -t my-api .
 docker run -p 8080:8080 -e JWT_SECRET=my-secret my-api
 ```
+
+### Vercel
+
+The `api/index.go` handler wraps the entire Gin app as a single serverless function. All routes are rewritten to it via `vercel.json`.
+
+```bash
+# Set JWT_SECRET so it persists across cold starts
+vercel env add JWT_SECRET
+
+# Deploy
+make deploy
+```
+
+The app also works on Render, Railway, Fly.io, or any platform that supports Docker or Go binaries -- it reads `PORT` from the environment.
